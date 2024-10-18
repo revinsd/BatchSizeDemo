@@ -1,6 +1,5 @@
 package com.example.BatchSizePower.entity.batchSize;
 
-import com.example.BatchSizePower.entity.HaveName;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -13,7 +12,7 @@ import lombok.experimental.Accessors;
 @Getter
 @Setter
 @Accessors(chain = true)
-public class SubBatchSizeEntity implements HaveName {
+public class SubBatchSizeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private long id;
