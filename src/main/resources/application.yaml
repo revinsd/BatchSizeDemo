@@ -1,0 +1,22 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/batchSizePower
+    username: postgres
+    password: 456456Rs456
+  jpa:
+    hibernate:
+      ddl-auto: create
+    properties:
+      hibernate:
+        format_sql: true
+        generate_statistics: false
+    show-sql: false
+    open-in-view: false
+
+logging:
+  file:
+    path: .
+    name: logs.log
+#  level:
+#    org.hibernate.SQL: debug
+
