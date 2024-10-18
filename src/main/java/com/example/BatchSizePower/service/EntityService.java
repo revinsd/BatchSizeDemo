@@ -1,10 +1,10 @@
 package com.example.BatchSizePower.service;
 
-import com.example.BatchSizePower.entity.HaveName;
 import com.example.BatchSizePower.entity.batchSize.BatchSizeEntity;
 import com.example.BatchSizePower.entity.batchSize.SubBatchSizeEntity;
 import com.example.BatchSizePower.entity.entityGraph.EntityGraphEntity;
 import com.example.BatchSizePower.entity.entityGraph.SubEntityGraphEntity;
+import com.example.BatchSizePower.mapper.EntityMapper;
 import com.example.BatchSizePower.repo.BatchSizeEntityRepo;
 import com.example.BatchSizePower.repo.EntityGraphEntityRepo;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +23,7 @@ import java.util.stream.IntStream;
 public class EntityService {
     private final EntityGraphEntityRepo entityGraphEntityRepo;
     private final BatchSizeEntityRepo batchSizeEntityRepo;
+    private final EntityMapper entityMapper;
 
     private static final String NAME_TEMPLATE = "NAME_%s";
 
@@ -45,7 +46,7 @@ public class EntityService {
         var ids = entityGraphEntityRepo.findAllIds();
         ids.forEach(id -> {
             var entity = entityGraphEntityRepo.findById(id).orElseThrow();
-            processSubEntityGraphEntities(entity);
+            entityMapper.map(entity);
         });
     }
 
@@ -53,7 +54,7 @@ public class EntityService {
     public void processEntityGraphEntities() {
         log.info("processEntityGraphEntities");
         var entityGraphEntities = entityGraphEntityRepo.findAll();
-        entityGraphEntities.forEach(this::processSubEntityGraphEntities);
+        entityGraphEntities.forEach(entityMapper::map);
     }
 
     @Transactional
@@ -61,11 +62,11 @@ public class EntityService {
         log.info("processEntityGraphEntityPagesSeparate");
         var idsPage = entityGraphEntityRepo.findAllIds(PageRequest.of(0, 10));
         entityGraphEntityRepo.findAllByIdIn(Set.copyOf(idsPage.getContent()))
-            .forEach(this::processSubEntityGraphEntities);
+            .forEach(entityMapper::map);
         while(idsPage.hasNext()){
             idsPage= entityGraphEntityRepo.findAllIds(idsPage.nextPageable());
             entityGraphEntityRepo.findAllByIdIn(Set.copyOf(idsPage.getContent()))
-                    .forEach(this::processSubEntityGraphEntities);
+                    .forEach(entityMapper::map);
         }
     }
 
@@ -74,17 +75,17 @@ public class EntityService {
         log.info("processEntityGraphEntitySinglePageSeparate");
         var idsPage = entityGraphEntityRepo.findAllIds(PageRequest.of(0, 10));
         entityGraphEntityRepo.findAllByIdIn(Set.copyOf(idsPage.getContent()))
-                .forEach(this::processSubEntityGraphEntities);
+                .forEach(entityMapper::map);
     }
 
     @Transactional
     public void processEntityGraphEntityPages() {
         log.info("processEntityGraphEntityPages");
         var page = entityGraphEntityRepo.findAll(PageRequest.of(0, 10));
-        page.forEach(this::processSubEntityGraphEntities);
+        page.forEach(entityMapper::map);
         while (page.hasNext()) {
             page = entityGraphEntityRepo.findAll(page.nextPageable());
-            page.forEach(this::processSubEntityGraphEntities);
+            page.forEach(entityMapper::map);
         }
     }
 
@@ -92,7 +93,7 @@ public class EntityService {
     public void processEntityGraphEntitySinglePage() {
         log.info("processEntityGraphEntitySinglePage");
         var page = entityGraphEntityRepo.findAll(PageRequest.of(0, 10));
-        page.forEach(this::processSubEntityGraphEntities);
+        page.forEach(entityMapper::map);
     }
 
     @Transactional
@@ -101,7 +102,7 @@ public class EntityService {
         var ids = batchSizeEntityRepo.findAllIds();
         ids.forEach(id -> {
             var entity = batchSizeEntityRepo.findById(id).orElseThrow();
-            processSubBatchSizeEntities(entity);
+            entityMapper.map(entity);
         });
     }
 
@@ -110,17 +111,17 @@ public class EntityService {
         log.info("processBatchSizeEntities");
         var batchSizeEntities = batchSizeEntityRepo.findAll();
         batchSizeEntities
-                .forEach(this::processSubBatchSizeEntities);
+                .forEach(entityMapper::map);
     }
 
     @Transactional
     public void processBatchSizeEntityPages() {
         log.info("processBatchSizeEntityPages");
         var page = batchSizeEntityRepo.findAll(PageRequest.of(0, 10));
-        page.forEach(this::processSubBatchSizeEntities);
+        page.forEach(entityMapper::map);
         while (page.hasNext()) {
             page = batchSizeEntityRepo.findAll(page.nextPageable());
-            page.forEach(this::processSubBatchSizeEntities);
+            page.forEach(entityMapper::map);
         }
     }
 
@@ -128,37 +129,7 @@ public class EntityService {
     public void processBatchSizeEntitiesSinglePage() {
         log.info("processBatchSizeEntitiesSinglePage");
         var page = batchSizeEntityRepo.findAll(PageRequest.of(0, 10));
-        page.forEach(this::processSubBatchSizeEntities);
-    }
-
-    private void processSubEntityGraphEntities(EntityGraphEntity entityGraphEntity) {
-        getNameSequence(entityGraphEntity.getSub1());
-        getNameSequence(entityGraphEntity.getSub2());
-        getNameSequence(entityGraphEntity.getSub3());
-        getNameSequence(entityGraphEntity.getSub4());
-        getNameSequence(entityGraphEntity.getSub5());
-        getNameSequence(entityGraphEntity.getSub6());
-        getNameSequence(entityGraphEntity.getSub7());
-        getNameSequence(entityGraphEntity.getSub8());
-        getNameSequence(entityGraphEntity.getSub9());
-        getNameSequence(entityGraphEntity.getSub10());
-    }
-
-    private void processSubBatchSizeEntities(BatchSizeEntity batchSizeEntity) {
-        getNameSequence(batchSizeEntity.getSub1());
-        getNameSequence(batchSizeEntity.getSub2());
-        getNameSequence(batchSizeEntity.getSub3());
-        getNameSequence(batchSizeEntity.getSub4());
-        getNameSequence(batchSizeEntity.getSub5());
-        getNameSequence(batchSizeEntity.getSub6());
-        getNameSequence(batchSizeEntity.getSub7());
-        getNameSequence(batchSizeEntity.getSub8());
-        getNameSequence(batchSizeEntity.getSub9());
-        getNameSequence(batchSizeEntity.getSub10());
-    }
-
-    private String getNameSequence(Set<? extends HaveName> entitiesWithName) {
-        return entitiesWithName.stream().map(HaveName::getName).collect(Collectors.joining(","));
+        page.forEach(entityMapper::map);
     }
 
     private void saveEntityGraphEntities(int mainEntitiesCount, int subEntitiesCount) {

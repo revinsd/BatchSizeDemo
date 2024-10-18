@@ -5,13 +5,12 @@ import com.example.BatchSizePower.result.ProcessStatsDto;
 import com.example.BatchSizePower.result.SpeedTestResultDto;
 import com.example.BatchSizePower.webocket.DiagramUpdateWebsocket;
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -20,7 +19,7 @@ public class SpeedTestService {
     private final EntityService entityService;
     private final DiagramUpdateWebsocket diagramUpdateWebsocket;
 
-    private static final List<Integer> MAIN_ENTITY_COUNTS = List.of(10, 50, 100, 500, 1000);
+    private static final Set<Integer> MAIN_ENTITY_COUNTS = Set.of(10, 50, 100, 500, 1000);
 
     public void startTest(StartSpeedTestRequestDto startSpeedTesRequestDto) {
         log.info("Speed test started");
@@ -39,53 +38,53 @@ public class SpeedTestService {
 
         if (startSpeedTestRequestDto.isProcessBatchSizeEntitiesOneByOne()) {
             speedTestResult.setProcessBatchSizeEntitiesOneByOneStats(
-                    performAndGetTimeAndQueryCount(entityService::processBatchSizeEntitiesOneByOne)
+                    processAndGetStats(entityService::processBatchSizeEntitiesOneByOne)
             );
         }
         if (startSpeedTestRequestDto.isProcessBatchSizeEntities()) {
             speedTestResult.setProcessBatchSizeEntitiesStats(
-                    performAndGetTimeAndQueryCount(entityService::processBatchSizeEntities)
+                    processAndGetStats(entityService::processBatchSizeEntities)
             );
         }
         if (startSpeedTestRequestDto.isProcessBatchSizeEntityPages()) {
             speedTestResult.setProcessBatchSizeEntityPagesStats(
-                    performAndGetTimeAndQueryCount(entityService::processBatchSizeEntityPages)
+                    processAndGetStats(entityService::processBatchSizeEntityPages)
             );
         }
         if (startSpeedTestRequestDto.isProcessBatchSizeEntitiesSinglePage()) {
             speedTestResult.setProcessBatchSizeEntitiesSinglePageStats(
-                    performAndGetTimeAndQueryCount(entityService::processBatchSizeEntitiesSinglePage)
+                    processAndGetStats(entityService::processBatchSizeEntitiesSinglePage)
             );
         }
 
         if (startSpeedTestRequestDto.isProcessEntityGraphEntitiesOneByOne()) {
             speedTestResult.setProcessEntityGraphEntitiesOneByOneStats(
-                    performAndGetTimeAndQueryCount(entityService::processEntityGraphEntitiesOneByOne)
+                    processAndGetStats(entityService::processEntityGraphEntitiesOneByOne)
             );
         }
         if (startSpeedTestRequestDto.isProcessEntityGraphEntities()) {
             speedTestResult.setProcessEntityGraphEntitiesStats(
-                    performAndGetTimeAndQueryCount(entityService::processEntityGraphEntities)
+                    processAndGetStats(entityService::processEntityGraphEntities)
             );
         }
         if (startSpeedTestRequestDto.isProcessEntityGraphEntityPages()) {
             speedTestResult.setProcessEntityGraphEntityPagesStats(
-                    performAndGetTimeAndQueryCount(entityService::processEntityGraphEntityPages)
+                    processAndGetStats(entityService::processEntityGraphEntityPages)
             );
         }
         if (startSpeedTestRequestDto.isProcessEntityGraphEntitySinglePage()) {
             speedTestResult.setProcessEntityGraphEntitySinglePageStats(
-                    performAndGetTimeAndQueryCount(entityService::processEntityGraphEntitySinglePage)
+                    processAndGetStats(entityService::processEntityGraphEntitySinglePage)
             );
         }
         if (startSpeedTestRequestDto.isProcessEntityGraphEntityPagesSeparate()) {
             speedTestResult.setProcessEntityGraphEntityPagesSeparateStats(
-                    performAndGetTimeAndQueryCount(entityService::processEntityGraphEntityPagesSeparate)
+                    processAndGetStats(entityService::processEntityGraphEntityPagesSeparate)
             );
         }
         if (startSpeedTestRequestDto.isProcessEntityGraphEntitySinglePageSeparate()) {
             speedTestResult.setProcessEntityGraphEntitySinglePageSeparateStats(
-                    performAndGetTimeAndQueryCount(entityService::processEntityGraphEntitySinglePageSeparate)
+                    processAndGetStats(entityService::processEntityGraphEntitySinglePageSeparate)
             );
         }
 
@@ -94,8 +93,7 @@ public class SpeedTestService {
         return speedTestResult;
     }
 
-    @SneakyThrows
-    private ProcessStatsDto performAndGetTimeAndQueryCount(Runnable runnable) {
+    private ProcessStatsDto processAndGetStats(Runnable runnable) {
         var startTime = Instant.now();
         runnable.run();
         var endTime = Instant.now();
