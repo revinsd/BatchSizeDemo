@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Set;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -19,7 +19,7 @@ public class SpeedTestService {
     private final EntityService entityService;
     private final DiagramUpdateWebsocket diagramUpdateWebsocket;
 
-    private static final Set<Integer> MAIN_ENTITY_COUNTS = Set.of(10, 50, 100, 500, 1000);
+    private static final List<Integer> MAIN_ENTITY_COUNTS = List.of(10, 50, 100, 500, 1000);
 
     public void startTest(StartSpeedTestRequestDto startSpeedTesRequestDto) {
         log.info("Speed test started");
@@ -27,36 +27,25 @@ public class SpeedTestService {
         log.info("Speed test finished");
     }
 
-    private void computeAndSend(int mainEntityCount, StartSpeedTestRequestDto startSpeedTesRequestDto) {
-        var result = computeResult(mainEntityCount, startSpeedTesRequestDto);
+    private void computeAndSend(int mainEntitiesCount, StartSpeedTestRequestDto startSpeedTestRequestDto) {
+        entityService.saveMainEntities(
+                mainEntitiesCount,
+                startSpeedTestRequestDto.getSubEntityCount(),
+                startSpeedTestRequestDto.getSubSubEntityCount()
+        );
+        var result = computeResult(startSpeedTestRequestDto);
         diagramUpdateWebsocket.updateDiagram(result);
+        entityService.deleteAllEntities();
     }
 
-    private SpeedTestResultDto computeResult(int mainEntitiesCount, StartSpeedTestRequestDto startSpeedTestRequestDto) {
-        entityService.saveMainEntities(mainEntitiesCount, startSpeedTestRequestDto.getSubEntityCount());
+    private SpeedTestResultDto computeResult(StartSpeedTestRequestDto startSpeedTestRequestDto) {
         var speedTestResult = new SpeedTestResultDto();
 
-        if (startSpeedTestRequestDto.isProcessBatchSizeEntitiesOneByOne()) {
-            speedTestResult.setProcessBatchSizeEntitiesOneByOneStats(
-                    processAndGetStats(entityService::processBatchSizeEntitiesOneByOne)
+        if (startSpeedTestRequestDto.isProcessEntityGraphFindById()) {
+            speedTestResult.setProcessEntityGraphFindByIdStats(
+                    processAndGetStats(entityService::processEntityGraphFindById)
             );
         }
-        if (startSpeedTestRequestDto.isProcessBatchSizeEntities()) {
-            speedTestResult.setProcessBatchSizeEntitiesStats(
-                    processAndGetStats(entityService::processBatchSizeEntities)
-            );
-        }
-        if (startSpeedTestRequestDto.isProcessBatchSizeEntityPages()) {
-            speedTestResult.setProcessBatchSizeEntityPagesStats(
-                    processAndGetStats(entityService::processBatchSizeEntityPages)
-            );
-        }
-        if (startSpeedTestRequestDto.isProcessBatchSizeEntitiesSinglePage()) {
-            speedTestResult.setProcessBatchSizeEntitiesSinglePageStats(
-                    processAndGetStats(entityService::processBatchSizeEntitiesSinglePage)
-            );
-        }
-
         if (startSpeedTestRequestDto.isProcessEntityGraphEntitiesOneByOne()) {
             speedTestResult.setProcessEntityGraphEntitiesOneByOneStats(
                     processAndGetStats(entityService::processEntityGraphEntitiesOneByOne)
@@ -88,8 +77,31 @@ public class SpeedTestService {
             );
         }
 
-        entityService.deleteAllEntities();
-
+        if (startSpeedTestRequestDto.isProcessBatchSizeFindById()) {
+            speedTestResult.setProcessBatchSizeFindByIdStats(
+                    processAndGetStats(entityService::processBatchSizeFindById)
+            );
+        }
+        if (startSpeedTestRequestDto.isProcessBatchSizeEntitiesOneByOne()) {
+            speedTestResult.setProcessBatchSizeEntitiesOneByOneStats(
+                    processAndGetStats(entityService::processBatchSizeEntitiesOneByOne)
+            );
+        }
+        if (startSpeedTestRequestDto.isProcessBatchSizeEntities()) {
+            speedTestResult.setProcessBatchSizeEntitiesStats(
+                    processAndGetStats(entityService::processBatchSizeEntities)
+            );
+        }
+        if (startSpeedTestRequestDto.isProcessBatchSizeEntityPages()) {
+            speedTestResult.setProcessBatchSizeEntityPagesStats(
+                    processAndGetStats(entityService::processBatchSizeEntityPages)
+            );
+        }
+        if (startSpeedTestRequestDto.isProcessBatchSizeEntitiesSinglePage()) {
+            speedTestResult.setProcessBatchSizeEntitiesSinglePageStats(
+                    processAndGetStats(entityService::processBatchSizeEntitiesSinglePage)
+            );
+        }
         return speedTestResult;
     }
 

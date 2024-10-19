@@ -17,6 +17,7 @@ public class BatchSizeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private long id;
+    private String name;
 
     @OneToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
     private Set<SubBatchSizeEntity> sub1;
@@ -32,19 +33,4 @@ public class BatchSizeEntity {
 
     @OneToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
     private Set<SubBatchSizeEntity> sub5;
-
-    @OneToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
-    private Set<SubBatchSizeEntity> sub6;
-
-    @OneToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
-    private Set<SubBatchSizeEntity> sub7;
-
-    @OneToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
-    private Set<SubBatchSizeEntity> sub8;
-
-    @OneToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
-    private Set<SubBatchSizeEntity> sub9;
-
-    @OneToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
-    private Set<SubBatchSizeEntity> sub10;
 }

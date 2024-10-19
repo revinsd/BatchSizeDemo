@@ -6,11 +6,13 @@ import lombok.experimental.Accessors;
 @Data
 @Accessors(chain = true)
 public class SpeedTestResultDto {
+    private ProcessStatsDto processBatchSizeFindByIdStats;
     private ProcessStatsDto processBatchSizeEntitiesOneByOneStats;
     private ProcessStatsDto processBatchSizeEntitiesStats;
     private ProcessStatsDto processBatchSizeEntityPagesStats;
     private ProcessStatsDto processBatchSizeEntitiesSinglePageStats;
 
+    private ProcessStatsDto processEntityGraphFindByIdStats;
     private ProcessStatsDto processEntityGraphEntitiesOneByOneStats;
     private ProcessStatsDto processEntityGraphEntitiesStats;
     private ProcessStatsDto processEntityGraphEntityPagesStats;

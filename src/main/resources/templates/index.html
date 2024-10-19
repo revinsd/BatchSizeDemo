@@ -19,6 +19,14 @@
             <input class="form-control w-25 col-auto" name="subEntityCount" type="number" value="2" min="0">
             <label class="form-label col-auto">Sub entities count</label>
         </div>
+        <div class="row">
+            <input class="form-control w-25 col-auto" name="subSubEntityCount" type="number" value="2" min="0">
+            <label class="form-label col-auto">Sub sub entities count</label>
+        </div>
+        <div>
+            <input class="form-check-input" name="processBatchSizeFindById" type="checkbox" checked>
+            <label class="form-label">BatchSize (FindById)</label>
+        </div>
         <div>
             <input class="form-check-input" name="processBatchSizeEntitiesOneByOne" type="checkbox" checked>
             <label class="form-label">BatchSize (OneByOne findById)</label>
@@ -36,6 +44,10 @@
             <label class="form-label">BatchSize (Single page)</label>
         </div>
         <div>
+            <input class="form-check-input" name="processEntityGraphFindById" type="checkbox" checked>
+            <label class="form-label">EntityGraph (FindById)</label>
+        </div>
+        <div>
             <input class="form-check-input" name="processEntityGraphEntitiesOneByOne" type="checkbox" checked>
             <label class="form-label">EntityGraph (OneByOne findById)</label>
         </div>
@@ -45,7 +57,8 @@
         </div>
         <div>
             <input class="form-check-input" name="processEntityGraphEntityPages" type="checkbox" checked>
-            <label class="form-label">EntityGraph (Multiple pages) <b>(Most likely OOM or SUPER long processing)</b></label>
+            <label class="form-label">EntityGraph (Multiple pages) <b>(Most likely OOM or SUPER long
+                processing)</b></label>
         </div>
         <div>
             <input class="form-check-input" name="processEntityGraphEntitySinglePage" type="checkbox" checked>
@@ -68,73 +81,87 @@
 <script>
     const xValues = [0, 10, 50, 100, 500, 1000];
 
+    const batchSizeFindById = {
+        label: "BatchSize (FindById)",
+        data: [0],
+        borderColor: "Aqua",
+        fill: false
+    }
+
     const batchSizeOneByOne = {
         label: "BatchSize (OneByOne findById)",
         data: [0],
-        borderColor: "deepPink",
+        borderColor: "Aquamarine",
         fill: false
     }
 
     const batchSizeFindAll = {
         label: "BatchSize (FindAll)",
         data: [0],
-        borderColor: "red",
+        borderColor: "Black",
         fill: false
     }
 
     const batchSizeMultiplePages = {
         label: "BatchSize (Multiple pages)",
         data: [0],
-        borderColor: "orange",
+        borderColor: "Blue",
         fill: false
     }
 
     const batchSizeSinglePage = {
         label: "BatchSize (Single page)",
         data: [0],
-        borderColor: "black",
+        borderColor: "BlueViolet",
+        fill: false
+    }
+
+    const entityGraphFindById = {
+        label: "EntityGraph (FindById)",
+        data: [0],
+        borderColor: "Brown",
         fill: false
     }
 
     const entityGraphOneByOne = {
         label: "EntityGraph (OneByOne findById)",
         data: [0],
-        borderColor: "maroon",
+        borderColor: "BurlyWood",
         fill: false
     }
 
     const entityGraphFindAll = {
         label: "EntityGraph (Find All)",
         data: [0],
-        borderColor: "green",
+        borderColor: "CadetBlue",
         fill: false
     }
 
     const entityGraphMultiplePages = {
         label: "EntityGraph (Multiple pages)",
         data: [0],
-        borderColor: "cyan",
+        borderColor: "Chartreuse",
         fill: false
     }
 
     const entityGraphSinglePage = {
         label: "EntityGraph (Single page)",
         data: [0],
-        borderColor: "brown",
+        borderColor: "Chocolate",
         fill: false
     }
 
     const entityGraphPagesSeparate = {
         label: "EntityGraph (Multiple pages separate request)",
         data: [0],
-        borderColor: "purple",
+        borderColor: "Coral",
         fill: false
     }
 
     const entityGraphSinglePageSeparate = {
         label: "EntityGraph (Single page separate request)",
         data: [0],
-        borderColor: "darkGreen",
+        borderColor: "CornflowerBlue",
         fill: false
     }
 
@@ -143,10 +170,12 @@
         data: {
             labels: xValues,
             datasets: [
+                batchSizeFindById,
                 batchSizeOneByOne,
                 batchSizeFindAll,
                 batchSizeMultiplePages,
                 batchSizeSinglePage,
+                entityGraphFindById,
                 entityGraphOneByOne,
                 entityGraphFindAll,
                 entityGraphMultiplePages,
@@ -222,11 +251,13 @@
 
     function updateDiagram(diagramUpdate) {
         console.log(diagramUpdate)
+        batchSizeFindById.data.push(diagramUpdate.processBatchSizeFindByIdStats?.requestTime)
         batchSizeOneByOne.data.push(diagramUpdate.processBatchSizeEntitiesOneByOneStats?.requestTime)
         batchSizeFindAll.data.push(diagramUpdate.processBatchSizeEntitiesStats?.requestTime);
         batchSizeMultiplePages.data.push(diagramUpdate.processBatchSizeEntityPagesStats?.requestTime);
         batchSizeSinglePage.data.push(diagramUpdate.processBatchSizeEntitiesSinglePageStats?.requestTime);
 
+        entityGraphFindById.data.push(diagramUpdate.processEntityGraphFindByIdStats?.requestTime)
         entityGraphOneByOne.data.push(diagramUpdate.processEntityGraphEntitiesOneByOneStats?.requestTime);
         entityGraphFindAll.data.push(diagramUpdate.processEntityGraphEntitiesStats?.requestTime);
         entityGraphMultiplePages.data.push(diagramUpdate.processEntityGraphEntityPagesStats?.requestTime);
@@ -237,16 +268,19 @@
     }
 
     function clearDiagram() {
-        batchSizeOneByOne.data = [0]
-        batchSizeFindAll.data = [0]
-        batchSizeMultiplePages.data = [0]
-        batchSizeSinglePage.data = [0]
-        entityGraphOneByOne.data = [0]
-        entityGraphFindAll.data = [0]
-        entityGraphMultiplePages.data = [0]
-        entityGraphSinglePage.data = [0]
-        entityGraphPagesSeparate.data = [0]
-        entityGraphSinglePageSeparate.data = [0]
+        chart.data.datasets.forEach(dataset => dataset.data = [0])
+        // batchSizeFindById.data = [0]
+        // batchSizeOneByOne.data = [0]
+        // batchSizeFindAll.data = [0]
+        // batchSizeMultiplePages.data = [0]
+        // batchSizeSinglePage.data = [0]
+        // entityGraphFindById.data = [0]
+        // entityGraphOneByOne.data = [0]
+        // entityGraphFindAll.data = [0]
+        // entityGraphMultiplePages.data = [0]
+        // entityGraphSinglePage.data = [0]
+        // entityGraphPagesSeparate.data = [0]
+        // entityGraphSinglePageSeparate.data = [0]
         chart.update();
     }
 </script>

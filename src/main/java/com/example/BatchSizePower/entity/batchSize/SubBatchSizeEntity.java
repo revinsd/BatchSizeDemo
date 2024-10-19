@@ -1,12 +1,11 @@
 package com.example.BatchSizePower.entity.batchSize;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
+
+import java.util.Set;
 
 @Entity
 @Getter
@@ -17,4 +16,10 @@ public class SubBatchSizeEntity {
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private long id;
     private String name;
+
+    @OneToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
+    private Set<SubSubBatchSizeEntity> sub1;
+
+    @OneToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
+    private Set<SubSubBatchSizeEntity> sub2;
 }

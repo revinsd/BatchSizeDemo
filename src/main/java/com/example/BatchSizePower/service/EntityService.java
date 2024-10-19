@@ -1,10 +1,9 @@
 package com.example.BatchSizePower.service;
 
-import com.example.BatchSizePower.entity.batchSize.BatchSizeEntity;
-import com.example.BatchSizePower.entity.batchSize.SubBatchSizeEntity;
-import com.example.BatchSizePower.entity.entityGraph.EntityGraphEntity;
-import com.example.BatchSizePower.entity.entityGraph.SubEntityGraphEntity;
 import com.example.BatchSizePower.mapper.EntityMapper;
+import com.example.BatchSizePower.mapper.MainEntityDto;
+import com.example.BatchSizePower.mapper.SubEntityDto;
+import com.example.BatchSizePower.mapper.SubSubEntityDto;
 import com.example.BatchSizePower.repo.BatchSizeEntityRepo;
 import com.example.BatchSizePower.repo.EntityGraphEntityRepo;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +12,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -25,12 +25,27 @@ public class EntityService {
     private final BatchSizeEntityRepo batchSizeEntityRepo;
     private final EntityMapper entityMapper;
 
-    private static final String NAME_TEMPLATE = "NAME_%s";
+    private static final String NAME = "NAME";
 
     @Transactional
-    public void saveMainEntities(int mainEntitiesCount, int subEntitiesCount) {
-        saveEntityGraphEntities(mainEntitiesCount, subEntitiesCount);
-        saveBatchSizeEntities(mainEntitiesCount, subEntitiesCount);
+    public void saveMainEntities(int mainEntitiesCount, int subEntitiesCount, int subSubEntitiesCount) {
+        log.info("Saving entities");
+        var currentEntityGraphEntitiesCount = (int) entityGraphEntityRepo.count();
+        var currentBatchSizeEntitiesCount = (int) batchSizeEntityRepo.count();
+        saveEntityGraphEntities(
+                currentEntityGraphEntitiesCount == 0
+                        ? mainEntitiesCount
+                        : mainEntitiesCount - currentEntityGraphEntitiesCount,
+                subEntitiesCount,
+                subSubEntitiesCount
+        );
+        saveBatchSizeEntities(
+                currentBatchSizeEntitiesCount == 0
+                        ? mainEntitiesCount
+                        : mainEntitiesCount - currentBatchSizeEntitiesCount,
+                subEntitiesCount,
+                subSubEntitiesCount
+        );
     }
 
     @Transactional
@@ -41,12 +56,19 @@ public class EntityService {
     }
 
     @Transactional
-    public void processEntityGraphEntitiesOneByOne(){
+    public void processEntityGraphFindById(){
+        log.info("processEntityGraphFindById");
+        var id = entityGraphEntityRepo.findAllIds(PageRequest.of(0,1)).iterator().next();
+        entityMapper.toDto(entityGraphEntityRepo.findById(id).orElseThrow());
+    }
+
+    @Transactional
+    public void processEntityGraphEntitiesOneByOne() {
         log.info("processEntityGraphEntitiesOneByOne");
         var ids = entityGraphEntityRepo.findAllIds();
         ids.forEach(id -> {
             var entity = entityGraphEntityRepo.findById(id).orElseThrow();
-            entityMapper.map(entity);
+            entityMapper.toDto(entity);
         });
     }
 
@@ -54,38 +76,38 @@ public class EntityService {
     public void processEntityGraphEntities() {
         log.info("processEntityGraphEntities");
         var entityGraphEntities = entityGraphEntityRepo.findAll();
-        entityGraphEntities.forEach(entityMapper::map);
+        entityGraphEntities.forEach(entityMapper::toDto);
     }
 
     @Transactional
-    public void processEntityGraphEntityPagesSeparate(){
+    public void processEntityGraphEntityPagesSeparate() {
         log.info("processEntityGraphEntityPagesSeparate");
         var idsPage = entityGraphEntityRepo.findAllIds(PageRequest.of(0, 10));
         entityGraphEntityRepo.findAllByIdIn(Set.copyOf(idsPage.getContent()))
-            .forEach(entityMapper::map);
-        while(idsPage.hasNext()){
-            idsPage= entityGraphEntityRepo.findAllIds(idsPage.nextPageable());
+                .forEach(entityMapper::toDto);
+        while (idsPage.hasNext()) {
+            idsPage = entityGraphEntityRepo.findAllIds(idsPage.nextPageable());
             entityGraphEntityRepo.findAllByIdIn(Set.copyOf(idsPage.getContent()))
-                    .forEach(entityMapper::map);
+                    .forEach(entityMapper::toDto);
         }
     }
 
     @Transactional
-    public void processEntityGraphEntitySinglePageSeparate(){
+    public void processEntityGraphEntitySinglePageSeparate() {
         log.info("processEntityGraphEntitySinglePageSeparate");
         var idsPage = entityGraphEntityRepo.findAllIds(PageRequest.of(0, 10));
         entityGraphEntityRepo.findAllByIdIn(Set.copyOf(idsPage.getContent()))
-                .forEach(entityMapper::map);
+                .forEach(entityMapper::toDto);
     }
 
     @Transactional
     public void processEntityGraphEntityPages() {
         log.info("processEntityGraphEntityPages");
         var page = entityGraphEntityRepo.findAll(PageRequest.of(0, 10));
-        page.forEach(entityMapper::map);
+        page.forEach(entityMapper::toDto);
         while (page.hasNext()) {
             page = entityGraphEntityRepo.findAll(page.nextPageable());
-            page.forEach(entityMapper::map);
+            page.forEach(entityMapper::toDto);
         }
     }
 
@@ -93,16 +115,23 @@ public class EntityService {
     public void processEntityGraphEntitySinglePage() {
         log.info("processEntityGraphEntitySinglePage");
         var page = entityGraphEntityRepo.findAll(PageRequest.of(0, 10));
-        page.forEach(entityMapper::map);
+        page.forEach(entityMapper::toDto);
     }
 
     @Transactional
-    public void processBatchSizeEntitiesOneByOne(){
+    public void processBatchSizeFindById(){
+        log.info("processBatchSizeFindById");
+        var id = batchSizeEntityRepo.findAllIds(PageRequest.of(0,1)).iterator().next();
+        entityMapper.toDto(batchSizeEntityRepo.findById(id).orElseThrow());
+    }
+
+    @Transactional
+    public void processBatchSizeEntitiesOneByOne() {
         log.info("processBatchSizeEntitiesOneByOne");
         var ids = batchSizeEntityRepo.findAllIds();
         ids.forEach(id -> {
             var entity = batchSizeEntityRepo.findById(id).orElseThrow();
-            entityMapper.map(entity);
+            entityMapper.toDto(entity);
         });
     }
 
@@ -111,17 +140,17 @@ public class EntityService {
         log.info("processBatchSizeEntities");
         var batchSizeEntities = batchSizeEntityRepo.findAll();
         batchSizeEntities
-                .forEach(entityMapper::map);
+                .forEach(entityMapper::toDto);
     }
 
     @Transactional
     public void processBatchSizeEntityPages() {
         log.info("processBatchSizeEntityPages");
         var page = batchSizeEntityRepo.findAll(PageRequest.of(0, 10));
-        page.forEach(entityMapper::map);
+        page.forEach(entityMapper::toDto);
         while (page.hasNext()) {
             page = batchSizeEntityRepo.findAll(page.nextPageable());
-            page.forEach(entityMapper::map);
+            page.forEach(entityMapper::toDto);
         }
     }
 
@@ -129,70 +158,57 @@ public class EntityService {
     public void processBatchSizeEntitiesSinglePage() {
         log.info("processBatchSizeEntitiesSinglePage");
         var page = batchSizeEntityRepo.findAll(PageRequest.of(0, 10));
-        page.forEach(entityMapper::map);
+        page.forEach(entityMapper::toDto);
     }
 
-    private void saveEntityGraphEntities(int mainEntitiesCount, int subEntitiesCount) {
-        var mainEntities = IntStream.range(0, mainEntitiesCount)
-                .mapToObj(i -> getEntityGraphEntity(subEntitiesCount))
-                .collect(Collectors.toSet());
-        entityGraphEntityRepo.saveAllAndFlush(mainEntities);
+    private void saveEntityGraphEntities(int mainEntitiesCount, int subEntitiesCount, int subSubEntitiesCount) {
+        var dtos = getMainEntityDtos(mainEntitiesCount, subEntitiesCount, subSubEntitiesCount);
+        entityGraphEntityRepo.saveAll(entityMapper.toEntityGraphEntities(dtos));
     }
 
-    private void saveBatchSizeEntities(int mainEntitiesCount, int subEntitiesCount) {
-        var mainEntities = IntStream.range(0, mainEntitiesCount)
-                .mapToObj(i -> getBatchSizeEntity(subEntitiesCount))
-                .collect(Collectors.toSet());
-        batchSizeEntityRepo.saveAllAndFlush(mainEntities);
+    private void saveBatchSizeEntities(int mainEntitiesCount, int subEntitiesCount, int subSubEntitiesCount) {
+        var dtos = getMainEntityDtos(mainEntitiesCount, subEntitiesCount, subSubEntitiesCount);
+        batchSizeEntityRepo.saveAll(entityMapper.toBatchSizeEntities(dtos));
     }
 
-    private EntityGraphEntity getEntityGraphEntity(int subEntitiesCount) {
-        return new EntityGraphEntity()
-                .setSub1(getSubEntityGraphEntities(subEntitiesCount))
-                .setSub2(getSubEntityGraphEntities(subEntitiesCount))
-                .setSub3(getSubEntityGraphEntities(subEntitiesCount))
-                .setSub4(getSubEntityGraphEntities(subEntitiesCount))
-                .setSub5(getSubEntityGraphEntities(subEntitiesCount))
-                .setSub6(getSubEntityGraphEntities(subEntitiesCount))
-                .setSub7(getSubEntityGraphEntities(subEntitiesCount))
-                .setSub8(getSubEntityGraphEntities(subEntitiesCount))
-                .setSub9(getSubEntityGraphEntities(subEntitiesCount))
-                .setSub10(getSubEntityGraphEntities(subEntitiesCount));
+    private List<MainEntityDto> getMainEntityDtos(int mainEntitiesCount, int subEntitiesCount, int subSubEntitiesCount) {
+        return IntStream.range(0, mainEntitiesCount)
+                .mapToObj(index -> getMainEntityDto(subEntitiesCount, subSubEntitiesCount))
+                .collect(Collectors.toList());
     }
 
-    private BatchSizeEntity getBatchSizeEntity(int subEntitiesCount) {
-        return new BatchSizeEntity()
-                .setSub1(getSubBatchSizeEntities(subEntitiesCount))
-                .setSub2(getSubBatchSizeEntities(subEntitiesCount))
-                .setSub3(getSubBatchSizeEntities(subEntitiesCount))
-                .setSub4(getSubBatchSizeEntities(subEntitiesCount))
-                .setSub5(getSubBatchSizeEntities(subEntitiesCount))
-                .setSub6(getSubBatchSizeEntities(subEntitiesCount))
-                .setSub7(getSubBatchSizeEntities(subEntitiesCount))
-                .setSub8(getSubBatchSizeEntities(subEntitiesCount))
-                .setSub9(getSubBatchSizeEntities(subEntitiesCount))
-                .setSub10(getSubBatchSizeEntities(subEntitiesCount));
+    private MainEntityDto getMainEntityDto(int subEntitiesCount, int subSubEntitiesCount) {
+        return new MainEntityDto()
+                .setSub1(getSubEntityDtos(subEntitiesCount, subSubEntitiesCount))
+                .setSub2(getSubEntityDtos(subEntitiesCount, subSubEntitiesCount))
+                .setSub3(getSubEntityDtos(subEntitiesCount, subSubEntitiesCount))
+                .setSub4(getSubEntityDtos(subEntitiesCount, subSubEntitiesCount))
+                .setSub5(getSubEntityDtos(subEntitiesCount, subSubEntitiesCount))
+                .setName(NAME);
     }
 
-    private Set<SubEntityGraphEntity> getSubEntityGraphEntities(int subEntitiesCount) {
+    private List<SubEntityDto> getSubEntityDtos(int subEntitiesCount, int subSubEntitiesCount) {
         return IntStream.range(0, subEntitiesCount)
-                .mapToObj(this::getSubEntityGraphEntity)
-                .collect(Collectors.toSet());
+                .mapToObj(index -> getSubEntityDto(subSubEntitiesCount))
+                .collect(Collectors.toList());
     }
 
-    private Set<SubBatchSizeEntity> getSubBatchSizeEntities(int subEntitiesCount) {
-        return IntStream.range(0, subEntitiesCount)
-                .mapToObj(this::getSubBatchSizeEntity)
-                .collect(Collectors.toSet());
+    private SubEntityDto getSubEntityDto(int subSubEntitiesCount) {
+        return new SubEntityDto()
+                .setSub1(getSubSubEntityDtos(subSubEntitiesCount))
+                .setSub2(getSubSubEntityDtos(subSubEntitiesCount))
+                .setName(NAME);
     }
 
-    private SubEntityGraphEntity getSubEntityGraphEntity(int index) {
-        return new SubEntityGraphEntity()
-                .setName(String.format(NAME_TEMPLATE, index));
+    private List<SubSubEntityDto> getSubSubEntityDtos(int subSubEntitiesCount) {
+        return IntStream.range(0, subSubEntitiesCount)
+                .mapToObj(i -> getSubSubEntityDto())
+                .collect(Collectors.toList());
     }
 
-    private SubBatchSizeEntity getSubBatchSizeEntity(int index) {
-        return new SubBatchSizeEntity()
-                .setName(String.format(NAME_TEMPLATE, index));
+    private SubSubEntityDto getSubSubEntityDto() {
+        return new SubSubEntityDto()
+                .setName(NAME);
     }
+
 }
