@@ -4,12 +4,14 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
+import org.hibernate.annotations.BatchSize;
 
 import java.util.Set;
 
 @Entity
 @Getter
 @Setter
+@BatchSize(size = 100)
 @Accessors(chain = true)
 public class SubBatchSizeEntity {
     @Id
