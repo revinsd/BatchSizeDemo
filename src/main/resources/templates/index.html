@@ -14,64 +14,6 @@
 <canvas id="diagram" style="width:100%"></canvas>
 <form id="start-test-form" method="POST" action="/speedTest/start">
     <div class="container">
-        <h2>Speed test settings</h2>
-        <div class="row">
-            <input class="form-control w-25 col-auto" name="subEntityCount" type="number" value="2" min="0">
-            <label class="form-label col-auto">Sub entities count</label>
-        </div>
-        <div class="row">
-            <input class="form-control w-25 col-auto" name="subSubEntityCount" type="number" value="2" min="0">
-            <label class="form-label col-auto">Sub sub entities count</label>
-        </div>
-        <div>
-            <input class="form-check-input" name="processBatchSizeFindById" type="checkbox" checked>
-            <label class="form-label">BatchSize (FindById)</label>
-        </div>
-        <div>
-            <input class="form-check-input" name="processBatchSizeEntitiesOneByOne" type="checkbox" checked>
-            <label class="form-label">BatchSize (OneByOne findById)</label>
-        </div>
-        <div>
-            <input class="form-check-input" name="processBatchSizeEntities" type="checkbox" checked>
-            <label class="form-label">BatchSize (FindAll)</label>
-        </div>
-        <div>
-            <input class="form-check-input" name="processBatchSizeEntityPages" type="checkbox" checked>
-            <label class="form-label">BatchSize (Multiple pages)</label>
-        </div>
-        <div>
-            <input class="form-check-input" name="processBatchSizeEntitiesSinglePage" type="checkbox" checked>
-            <label class="form-label">BatchSize (Single page)</label>
-        </div>
-        <div>
-            <input class="form-check-input" name="processEntityGraphFindById" type="checkbox" checked>
-            <label class="form-label">EntityGraph (FindById)</label>
-        </div>
-        <div>
-            <input class="form-check-input" name="processEntityGraphEntitiesOneByOne" type="checkbox" checked>
-            <label class="form-label">EntityGraph (OneByOne findById)</label>
-        </div>
-        <div>
-            <input class="form-check-input" name="processEntityGraphEntities" type="checkbox" checked>
-            <label class="form-label">EntityGraph (FindAll)</label>
-        </div>
-        <div>
-            <input class="form-check-input" name="processEntityGraphEntityPages" type="checkbox" checked>
-            <label class="form-label">EntityGraph (Multiple pages) <b>(Most likely OOM or SUPER long
-                processing)</b></label>
-        </div>
-        <div>
-            <input class="form-check-input" name="processEntityGraphEntitySinglePage" type="checkbox" checked>
-            <label class="form-label">EntityGraph (Single page)</label>
-        </div>
-        <div>
-            <input class="form-check-input" name="processEntityGraphEntityPagesSeparate" type="checkbox" checked>
-            <label class="form-label">EntityGraph (Multiple pages separate request)</label>
-        </div>
-        <div>
-            <input class="form-check-input" name="processEntityGraphEntitySinglePageSeparate" type="checkbox" checked>
-            <label class="form-label">EntityGraph (Single page separate request)</label>
-        </div>
         <div>
             <button class="btn btn-success" id="start-test">Start test</button>
         </div>
@@ -79,89 +21,33 @@
 </form>
 </body>
 <script>
-    const xValues = [0, 10, 50, 100, 500, 1000];
+    const xValues = [0, 10000];
 
-    const batchSizeFindById = {
-        label: "BatchSize (FindById)",
+    const batchSizeFindByIdIn = {
+        label: "BatchSize (FindByIdIn)",
         data: [0],
         borderColor: "Aqua",
         fill: false
     }
 
-    const batchSizeOneByOne = {
-        label: "BatchSize (OneByOne findById)",
+    const entityGraphFindByIdIn = {
+        label: "EntityGraph (FindByIdIn)",
         data: [0],
-        borderColor: "Aquamarine",
+        borderColor: "Brown",
         fill: false
     }
 
     const batchSizeFindAll = {
         label: "BatchSize (FindAll)",
         data: [0],
-        borderColor: "Black",
-        fill: false
-    }
-
-    const batchSizeMultiplePages = {
-        label: "BatchSize (Multiple pages)",
-        data: [0],
-        borderColor: "Blue",
-        fill: false
-    }
-
-    const batchSizeSinglePage = {
-        label: "BatchSize (Single page)",
-        data: [0],
-        borderColor: "BlueViolet",
-        fill: false
-    }
-
-    const entityGraphFindById = {
-        label: "EntityGraph (FindById)",
-        data: [0],
-        borderColor: "Brown",
-        fill: false
-    }
-
-    const entityGraphOneByOne = {
-        label: "EntityGraph (OneByOne findById)",
-        data: [0],
-        borderColor: "BurlyWood",
+        borderColor: "Red",
         fill: false
     }
 
     const entityGraphFindAll = {
-        label: "EntityGraph (Find All)",
+        label: "EntityGraph (FindAll)",
         data: [0],
-        borderColor: "CadetBlue",
-        fill: false
-    }
-
-    const entityGraphMultiplePages = {
-        label: "EntityGraph (Multiple pages)",
-        data: [0],
-        borderColor: "Chartreuse",
-        fill: false
-    }
-
-    const entityGraphSinglePage = {
-        label: "EntityGraph (Single page)",
-        data: [0],
-        borderColor: "Chocolate",
-        fill: false
-    }
-
-    const entityGraphPagesSeparate = {
-        label: "EntityGraph (Multiple pages separate request)",
-        data: [0],
-        borderColor: "Coral",
-        fill: false
-    }
-
-    const entityGraphSinglePageSeparate = {
-        label: "EntityGraph (Single page separate request)",
-        data: [0],
-        borderColor: "CornflowerBlue",
+        borderColor: "Cyan",
         fill: false
     }
 
@@ -170,18 +56,10 @@
         data: {
             labels: xValues,
             datasets: [
-                batchSizeFindById,
-                batchSizeOneByOne,
+                batchSizeFindByIdIn,
+                entityGraphFindByIdIn,
                 batchSizeFindAll,
-                batchSizeMultiplePages,
-                batchSizeSinglePage,
-                entityGraphFindById,
-                entityGraphOneByOne,
-                entityGraphFindAll,
-                entityGraphMultiplePages,
-                entityGraphSinglePage,
-                entityGraphPagesSeparate,
-                entityGraphSinglePageSeparate
+                entityGraphFindAll
             ]
         },
         options: {
@@ -226,13 +104,8 @@
     document.querySelector("#start-test-form").addEventListener("submit", (event) => {
         event.preventDefault();
         clearDiagram()
-        const data = new URLSearchParams();
-        for (const pair of new FormData(event.target)) {
-            data.append(pair[0], pair[1]);
-        }
         fetch(event.target.action, {
-            method: "POST",
-            body: data
+            method: "POST"
         }).then(res => alert('Finished'));
     })
 
@@ -251,36 +124,15 @@
 
     function updateDiagram(diagramUpdate) {
         console.log(diagramUpdate)
-        batchSizeFindById.data.push(diagramUpdate.processBatchSizeFindByIdStats?.requestTime)
-        batchSizeOneByOne.data.push(diagramUpdate.processBatchSizeEntitiesOneByOneStats?.requestTime)
-        batchSizeFindAll.data.push(diagramUpdate.processBatchSizeEntitiesStats?.requestTime);
-        batchSizeMultiplePages.data.push(diagramUpdate.processBatchSizeEntityPagesStats?.requestTime);
-        batchSizeSinglePage.data.push(diagramUpdate.processBatchSizeEntitiesSinglePageStats?.requestTime);
-
-        entityGraphFindById.data.push(diagramUpdate.processEntityGraphFindByIdStats?.requestTime)
-        entityGraphOneByOne.data.push(diagramUpdate.processEntityGraphEntitiesOneByOneStats?.requestTime);
-        entityGraphFindAll.data.push(diagramUpdate.processEntityGraphEntitiesStats?.requestTime);
-        entityGraphMultiplePages.data.push(diagramUpdate.processEntityGraphEntityPagesStats?.requestTime);
-        entityGraphSinglePage.data.push(diagramUpdate.processEntityGraphEntitySinglePageStats?.requestTime);
-        entityGraphPagesSeparate.data.push(diagramUpdate.processEntityGraphEntityPagesSeparateStats?.requestTime);
-        entityGraphSinglePageSeparate.data.push(diagramUpdate.processEntityGraphEntitySinglePageSeparateStats?.requestTime);
+        batchSizeFindByIdIn.data.push(diagramUpdate.processBatchSizeFindByIdInStats?.requestTime)
+        entityGraphFindByIdIn.data.push(diagramUpdate.processEntityGraphFindByIdInStats?.requestTime)
+        entityGraphFindAll.data.push(diagramUpdate.processEntityGraphFindAllStats?.requestTime)
+        batchSizeFindAll.data.push(diagramUpdate.processBatchSizeFindAllStats?.requestTime)
         chart.update();
     }
 
     function clearDiagram() {
         chart.data.datasets.forEach(dataset => dataset.data = [0])
-        // batchSizeFindById.data = [0]
-        // batchSizeOneByOne.data = [0]
-        // batchSizeFindAll.data = [0]
-        // batchSizeMultiplePages.data = [0]
-        // batchSizeSinglePage.data = [0]
-        // entityGraphFindById.data = [0]
-        // entityGraphOneByOne.data = [0]
-        // entityGraphFindAll.data = [0]
-        // entityGraphMultiplePages.data = [0]
-        // entityGraphSinglePage.data = [0]
-        // entityGraphPagesSeparate.data = [0]
-        // entityGraphSinglePageSeparate.data = [0]
         chart.update();
     }
 </script>

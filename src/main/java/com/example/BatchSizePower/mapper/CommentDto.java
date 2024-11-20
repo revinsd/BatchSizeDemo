@@ -1,20 +1,16 @@
-package com.example.BatchSizePower.entity.entityGraph;
+package com.example.BatchSizePower.mapper;
 
-import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 import lombok.experimental.Accessors;
 
-@Entity
-@Getter
-@Setter
+@Data
 @Accessors(chain = true)
-public class SubSubEntityGraphEntity {
+public class CommentDto {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private long id;
-    private String name;
+    private String content;
 }
